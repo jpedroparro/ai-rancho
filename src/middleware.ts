@@ -1,0 +1,19 @@
+import { withAuth } from 'next-auth/middleware'
+
+export default withAuth({
+  pages: { signIn: '/auth/login' },
+})
+
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/animals/:path*',
+    '/milk/:path*',
+    '/sales/:path*',
+    '/expenses/:path*',
+    '/employees/:path*',
+    '/financial/:path*',
+    '/dairy/:path*',
+    '/reports/:path*',
+  ],
+}
