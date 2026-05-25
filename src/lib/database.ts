@@ -152,6 +152,80 @@ function initSchema(db: any): void {
       createdAt TEXT NOT NULL DEFAULT (datetime('now')),
       updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS weights (
+      id TEXT PRIMARY KEY,
+      animalId TEXT NOT NULL,
+      date TEXT NOT NULL,
+      weight REAL NOT NULL,
+      notes TEXT,
+      farmId TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (animalId) REFERENCES animals(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS health_events (
+      id TEXT PRIMARY KEY,
+      animalId TEXT,
+      farmId TEXT,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      date TEXT NOT NULL,
+      dose TEXT,
+      product TEXT,
+      veterinarian TEXT,
+      withdrawalDays INTEGER DEFAULT 0,
+      withdrawalEndDate TEXT,
+      famacha INTEGER,
+      notes TEXT,
+      status TEXT NOT NULL DEFAULT 'DONE',
+      createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS reproduction_events (
+      id TEXT PRIMARY KEY,
+      animalId TEXT NOT NULL,
+      farmId TEXT,
+      type TEXT NOT NULL,
+      date TEXT NOT NULL,
+      result TEXT,
+      bullId TEXT,
+      calvingDate TEXT,
+      calfId TEXT,
+      daysOpen INTEGER,
+      notes TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (animalId) REFERENCES animals(id) ON DELETE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS milk_stock_movements (
+      id TEXT PRIMARY KEY,
+      farmId TEXT,
+      date TEXT NOT NULL,
+      type TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      quantity REAL NOT NULL,
+      saleId TEXT,
+      notes TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS sale_animals (
+      saleId TEXT NOT NULL,
+      animalId TEXT NOT NULL,
+      weight REAL,
+      pricePerKg REAL,
+      PRIMARY KEY (saleId, animalId)
+    );
+    CREATE TABLE IF NOT EXISTS shearing_records (
+      id TEXT PRIMARY KEY,
+      animalId TEXT NOT NULL,
+      farmId TEXT,
+      date TEXT NOT NULL,
+      woolWeight REAL NOT NULL,
+      quality TEXT,
+      serviceProvider TEXT,
+      costPerAnimal REAL DEFAULT 0,
+      notes TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (animalId) REFERENCES animals(id) ON DELETE CASCADE
+    );
     CREATE TABLE IF NOT EXISTS goals (
       id TEXT PRIMARY KEY,
       farmId TEXT,
@@ -173,6 +247,7 @@ function initSchema(db: any): void {
     'ALTER TABLE sales ADD COLUMN farmId TEXT',
     'ALTER TABLE expenses ADD COLUMN farmId TEXT',
     'ALTER TABLE employees ADD COLUMN farmId TEXT',
+    'ALTER TABLE sales ADD COLUMN animalIds TEXT',
   ]
   for (const sql of migrations) {
     try { db.run(sql) } catch { /* column already exists */ }

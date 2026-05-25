@@ -5,6 +5,9 @@ export function createMilkService(repo: IMilkRepository = createMilkRepository()
   return {
     getRecords: (days: number, farmIds?: string[]) => repo.findByDays(days, farmIds),
 
+    getRecordsByDateRange: (startDate: string, endDate: string, farmIds?: string[]) =>
+      repo.findByDateRange(startDate, endDate, farmIds),
+
     getRecordsByAnimal: (animalId: string) => repo.findByAnimalId(animalId),
 
     createRecord: (data: CreateMilkDto) => repo.create({

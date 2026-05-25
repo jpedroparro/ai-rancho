@@ -7,7 +7,25 @@ export function createMilkRepository(): IMilkRepository {
       const db = await getDb()
       const since = new Date(Date.now() - days * 86_400_000).toISOString().split('T')[0]
       const fc = farmClause(farmIds)
-      const records = qRows(db, `SELECT * FROM milk_records WHERE date >= ?${fc.sql} ORDER BY date DESC`, [since, ...fc.params])
+      const records = qRows(
+        db,
+        'SELECT * FROM milk_records WHERE date >= ?' + fc.sql + ' ORDER BY date ASC',
+        [since, ...fc.params]
+      )
+      return records.map(r => ({
+        ...r,
+        animal: qRow(db, 'SELECT tag, name FROM animals WHERE id=?', [r.animalId]) ?? undefined,
+      })) as MilkRecord[]
+    },
+
+    async findByDateRange(startDate, endDate, farmIds?) {
+      const db = await getDb()
+      const fc = farmClause(farmIds)
+      const records = qRows(
+        db,
+        'SELECT * FROM milk_records WHERE date >= ? AND date <= ?' + fc.sql + ' ORDER BY date ASC',
+        [startDate, endDate, ...fc.params]
+      )
       return records.map(r => ({
         ...r,
         animal: qRow(db, 'SELECT tag, name FROM animals WHERE id=?', [r.animalId]) ?? undefined,

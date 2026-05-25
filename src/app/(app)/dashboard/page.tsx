@@ -34,12 +34,11 @@ export default function DashboardPage() {
     </div>
   )
 
-  const milkByDay: Record<string, number> = {}
-  data.milkRecords?.forEach((r: any) => {
-    const d = new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-    milkByDay[d] = (milkByDay[d] || 0) + r.total
-  })
-  const milkChart = Object.entries(milkByDay).slice(-7).map(([date, total]) => ({ date, total: +total.toFixed(1) }))
+  const milkChart = (data.milkRecords || []).map((r: any) => ({
+    date: new Date(r.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    total: +Number(r.total).toFixed(1),
+  }))
+  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: 1200 }}>
@@ -63,7 +62,7 @@ export default function DashboardPage() {
         {/* Left column: charts */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="card">
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, marginBottom: '1rem' }}>Produção de Leite (7 dias)</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, marginBottom: '1rem' }}>{`Producao de Leite — ${monthName}`}</h3>
             {milkChart.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={milkChart}>

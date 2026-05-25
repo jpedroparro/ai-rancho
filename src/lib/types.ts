@@ -197,6 +197,7 @@ export interface IAnimalRepository {
 
 export interface IMilkRepository {
   findByDays(days: number, farmIds?: string[]): Promise<MilkRecord[]>
+  findByDateRange(startDate: string, endDate: string, farmIds?: string[]): Promise<MilkRecord[]>
   findByAnimalId(animalId: string): Promise<MilkRecord[]>
   create(data: Omit<MilkRecord, 'id' | 'createdAt' | 'animal'>): Promise<MilkRecord>
 }
@@ -321,4 +322,137 @@ export interface ICalendarRepository {
   create(data: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt' | 'animal'>): Promise<CalendarEvent>
   update(id: string, data: Partial<Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt' | 'animal'>>): Promise<CalendarEvent>
   delete(id: string): Promise<void>
+}
+
+// ── New Module Types ──────────────────────────────────────────────────────────
+
+export type WeightRecord = {
+  id: string
+  animalId: string
+  date: string
+  weight: number
+  notes: string | null
+  farmId?: string | null
+  createdAt: string
+  animal?: { tag: string; name: string | null }
+}
+
+export type HealthEventType = 'VACCINATION' | 'TREATMENT' | 'DEWORMING' | 'EXAMINATION'
+export type HealthEventStatus = 'DONE' | 'SCHEDULED'
+
+export interface HealthEvent {
+  id: string
+  animalId?: string | null
+  farmId?: string | null
+  type: HealthEventType
+  title: string
+  date: string
+  dose?: string | null
+  product?: string | null
+  veterinarian?: string | null
+  withdrawalDays: number
+  withdrawalEndDate?: string | null
+  famacha?: number | null
+  notes?: string | null
+  status: HealthEventStatus
+  createdAt: string
+  animal?: { tag: string; name: string | null } | null
+}
+
+export type ReproductionEventType = 'INSEMINATION' | 'PREGNANCY_CHECK' | 'CALVING' | 'DRY_OFF'
+export type ReproductionResult = 'PREGNANT' | 'OPEN' | 'POSITIVE' | 'NEGATIVE'
+
+export interface ReproductionEvent {
+  id: string
+  animalId: string
+  farmId?: string | null
+  type: ReproductionEventType
+  date: string
+  result?: ReproductionResult | null
+  bullId?: string | null
+  calvingDate?: string | null
+  calfId?: string | null
+  daysOpen?: number | null
+  notes?: string | null
+  createdAt: string
+  animal?: { tag: string; name: string | null }
+}
+
+export type MilkStockMovementType = 'ENTRY' | 'EXIT'
+export type MilkStockReason = 'PRODUCTION' | 'SALE' | 'DISCARD' | 'OWN_CONSUMPTION'
+
+export interface MilkStockMovement {
+  id: string
+  farmId?: string | null
+  date: string
+  type: MilkStockMovementType
+  reason: MilkStockReason
+  quantity: number
+  saleId?: string | null
+  notes?: string | null
+  createdAt: string
+}
+
+export type WoolQuality = 'FINE' | 'MEDIUM' | 'COARSE'
+
+export interface ShearingRecord {
+  id: string
+  animalId: string
+  farmId?: string | null
+  date: string
+  woolWeight: number
+  quality?: WoolQuality | null
+  serviceProvider?: string | null
+  costPerAnimal: number
+  notes?: string | null
+  createdAt: string
+  animal?: { tag: string; name: string | null }
+}
+
+export interface CreateWeightDto {
+  animalId: string; date: string; weight: number; notes?: string; farmId?: string
+}
+export interface CreateHealthEventDto {
+  animalId?: string; farmId?: string; type: HealthEventType; title: string; date: string
+  dose?: string; product?: string; veterinarian?: string; withdrawalDays?: number
+  famacha?: number; notes?: string; status?: HealthEventStatus
+}
+export interface CreateReproductionEventDto {
+  animalId: string; farmId?: string; type: ReproductionEventType; date: string
+  result?: ReproductionResult; bullId?: string; notes?: string
+}
+export interface CreateMilkStockMovementDto {
+  farmId?: string; date: string; type: MilkStockMovementType; reason: MilkStockReason
+  quantity: number; saleId?: string; notes?: string
+}
+export interface CreateShearingRecordDto {
+  animalId: string; farmId?: string; date: string; woolWeight: number
+  quality?: WoolQuality; serviceProvider?: string; costPerAnimal?: number; notes?: string
+}
+
+export interface IWeightRepository {
+  findByAnimal(animalId: string): Promise<WeightRecord[]>
+  findAll(farmIds?: string[]): Promise<WeightRecord[]>
+  create(data: CreateWeightDto): Promise<WeightRecord>
+}
+export interface IHealthRepository {
+  findAll(filters?: { farmIds?: string[]; animalId?: string }): Promise<HealthEvent[]>
+  create(data: CreateHealthEventDto): Promise<HealthEvent>
+  delete(id: string): Promise<void>
+}
+export interface IReproductionRepository {
+  findByAnimal(animalId: string): Promise<ReproductionEvent[]>
+  findAll(farmIds?: string[]): Promise<ReproductionEvent[]>
+  create(data: CreateReproductionEventDto): Promise<ReproductionEvent>
+}
+export interface IMilkStockRepository {
+  getBalance(farmIds?: string[]): Promise<number>
+  findMovements(farmIds?: string[]): Promise<MilkStockMovement[]>
+  addEntry(data: CreateMilkStockMovementDto): Promise<MilkStockMovement>
+  addExit(data: CreateMilkStockMovementDto): Promise<MilkStockMovement>
+}
+export interface IShearingRepository {
+  findByAnimal(animalId: string): Promise<ShearingRecord[]>
+  findAll(farmIds?: string[]): Promise<ShearingRecord[]>
+  create(data: CreateShearingRecordDto): Promise<ShearingRecord>
 }
